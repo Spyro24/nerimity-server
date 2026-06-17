@@ -10,10 +10,11 @@ export function getStats(Router: Router) {
 async function route(req: Request, res: Response) {
   const firstDayOfWeek = getFirstDayOfWeek();
 
-  const totalRegisteredUsersTime = performance.now();
+  let totalRegisteredUsersTime = performance.now();
   const totalRegisteredUsers = await prisma.user.count();
+  totalRegisteredUsersTime = performance.now() - totalRegisteredUsersTime;
 
-  const weeklyRegisteredUsersTime = performance.now();
+  let weeklyRegisteredUsersTime = performance.now();
   const weeklyRegisteredUsers = await prisma.user.count({
     where: {
       joinedAt: {
@@ -21,14 +22,17 @@ async function route(req: Request, res: Response) {
       },
     },
   });
+  weeklyRegisteredUsersTime = performance.now() - weeklyRegisteredUsersTime;
 
-  const totalCreatedServersTime = performance.now();
+  let totalCreatedServersTime = performance.now();
   const totalCreatedServers = await prisma.server.count();
+  totalCreatedServersTime = performance.now() - totalCreatedServersTime;
 
-  const totalCreatedMessagesTime = performance.now();
+  let totalCreatedMessagesTime = performance.now();
   const totalCreatedMessages = await prisma.message.count();
+  totalCreatedMessagesTime = performance.now() - totalCreatedMessagesTime;
 
-  const weeklyCreatedMessagesTime = performance.now();
+  let weeklyCreatedMessagesTime = performance.now();
   const weeklyCreatedMessages = await prisma.message.count({
     where: {
       createdAt: {
@@ -36,6 +40,7 @@ async function route(req: Request, res: Response) {
       },
     },
   });
+  weeklyCreatedMessagesTime = performance.now() - weeklyCreatedMessagesTime;
 
   res.json({
     totalRegisteredUsers,
@@ -45,11 +50,11 @@ async function route(req: Request, res: Response) {
     weeklyCreatedMessages,
 
     debug: {
-      totalRegisteredUsersTime: performance.now() - totalRegisteredUsersTime,
-      weeklyRegisteredUsersTime: performance.now() - weeklyRegisteredUsersTime,
-      totalCreatedServersTime: performance.now() - totalCreatedServersTime,
-      totalCreatedMessagesTime: performance.now() - totalCreatedMessagesTime,
-      weeklyCreatedMessagesTime: performance.now() - weeklyCreatedMessagesTime,
+      totalRegisteredUsersTime,
+      weeklyRegisteredUsersTime,
+      totalCreatedServersTime,
+      totalCreatedMessagesTime,
+      weeklyCreatedMessagesTime,
     },
   });
 }
