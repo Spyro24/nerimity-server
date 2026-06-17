@@ -44,11 +44,13 @@ async function route(req: Request, res: Response) {
     totalCreatedMessages,
     weeklyCreatedMessages,
 
-    totalRegisteredUsersTime: totalRegisteredUsersTime - performance.now(),
-    weeklyRegisteredUsersTime: weeklyRegisteredUsersTime - performance.now(),
-    totalCreatedServersTime: totalCreatedServersTime - performance.now(),
-    totalCreatedMessagesTime: totalCreatedMessagesTime - performance.now(),
-    weeklyCreatedMessagesTime: weeklyCreatedMessagesTime - performance.now(),
+    debug: {
+      totalRegisteredUsersTime: performance.now() - totalRegisteredUsersTime,
+      weeklyRegisteredUsersTime: performance.now() - weeklyRegisteredUsersTime,
+      totalCreatedServersTime: performance.now() - totalCreatedServersTime,
+      totalCreatedMessagesTime: performance.now() - totalCreatedMessagesTime,
+      weeklyCreatedMessagesTime: performance.now() - weeklyCreatedMessagesTime,
+    },
   });
 }
 
