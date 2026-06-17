@@ -10,7 +10,10 @@ export function getStats(Router: Router) {
 async function route(req: Request, res: Response) {
   const firstDayOfWeek = getFirstDayOfWeek();
 
+  const totalRegisteredUsersTime = performance.now();
   const totalRegisteredUsers = await prisma.user.count();
+
+  const weeklyRegisteredUsersTime = performance.now();
   const weeklyRegisteredUsers = await prisma.user.count({
     where: {
       joinedAt: {
@@ -19,8 +22,13 @@ async function route(req: Request, res: Response) {
     },
   });
 
+  const totalCreatedServersTime = performance.now();
   const totalCreatedServers = await prisma.server.count();
+
+  const totalCreatedMessagesTime = performance.now();
   const totalCreatedMessages = await prisma.message.count();
+
+  const weeklyCreatedMessagesTime = performance.now();
   const weeklyCreatedMessages = await prisma.message.count({
     where: {
       createdAt: {
@@ -35,6 +43,12 @@ async function route(req: Request, res: Response) {
     totalCreatedServers,
     totalCreatedMessages,
     weeklyCreatedMessages,
+
+    totalRegisteredUsersTime: totalRegisteredUsersTime - performance.now(),
+    weeklyRegisteredUsersTime: weeklyRegisteredUsersTime - performance.now(),
+    totalCreatedServersTime: totalCreatedServersTime - performance.now(),
+    totalCreatedMessagesTime: totalCreatedMessagesTime - performance.now(),
+    weeklyCreatedMessagesTime: weeklyCreatedMessagesTime - performance.now(),
   });
 }
 
