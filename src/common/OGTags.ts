@@ -112,7 +112,7 @@ export async function getOGTags(url: string): GetOGTagsReturn {
   let object = Object.fromEntries(entries || []);
 
   const isTwitterStatus = (object.imageUrl && url.startsWith('https://twitter.com')) || url.startsWith('https://x.com');
-  const largeImage = isTwitterStatus || metaTags.find((el) => el.attributes.name === 'twitter:card')?.attributes.content === 'summary_large_image';
+  const largeImage = isTwitterStatus || metaTags.find((el) => (el.attributes.name || el.attributes.property) === 'twitter:card')?.attributes.content === 'summary_large_image';
 
   // DOES NOT WORK: Twitter stupidly has multiple different image urls for videos. one of them being the normal image url.
   // const isTwitterVideo = isTwitterStatus && (object.imageUrl.startsWith('https://pbs.twimg.com/ext_tw_video_thumb') || object.imageUrl.startsWith(' https://pbs.twimg.com/amplify_video_thumb'));
