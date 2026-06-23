@@ -17,6 +17,7 @@ const mapper = new Map(
     image: 'imageUrl',
     'image:width': 'imageWidth',
     'image:height': 'imageHeight',
+    'theme-color': 'themeColor',
   }),
 );
 
