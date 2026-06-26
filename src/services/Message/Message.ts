@@ -113,8 +113,9 @@ export function transformMessage(message: TransformMessage) {
     creatorOverride: undefined,
   };
 
+  let htmlEmbed = undefined;
   if (message.htmlEmbed) {
-    message.htmlEmbed = message.htmlEmbed ? JSON.parse(unzipBuffer(message.htmlEmbed) || 'undefined') : undefined;
+    htmlEmbed = message.htmlEmbed ? JSON.parse(unzipBuffer(message.htmlEmbed) || 'null') : undefined;
   }
 
   const createdBy = (() => {
