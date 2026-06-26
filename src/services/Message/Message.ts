@@ -18,6 +18,7 @@ import { createMessageV2 } from './MessageCreate';
 import { editMessageV2 } from './MessageEdit';
 import { ButtonCallback } from '@src/routes/channels/channelMessageButtonClickCallback';
 import { createSystemMessage } from './MessageCreateSystem';
+import { unzipBuffer } from '@src/common/zip';
 
 interface GetMessageByChannelIdOpts {
   limit?: number;
@@ -112,7 +113,9 @@ export function transformMessage(message: TransformMessage) {
     creatorOverride: undefined,
   };
 
-  const htmlEmbed = message.htmlEmbed ? Buffer.from(message.htmlEmbed).toString('base64') : undefined;
+  if (message.htmlEmbed) {
+    message.htmlEmbed = message.htmlEmbed ? JSON.parse(unzipBuffer(message.htmlEmbed) || 'undefined') : undefined;
+  }
 
   const createdBy = (() => {
     if (message.webhook) {

@@ -13,3 +13,10 @@ export function unzip(base64: string) {
     return null;
   }
 }
+export function unzipBuffer(intArr: Uint8Array) {
+  try {
+    return pako.inflate(intArr, { to: 'string' });
+  } catch {
+    return null;
+  }
+}
