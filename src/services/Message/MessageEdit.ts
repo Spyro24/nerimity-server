@@ -144,7 +144,7 @@ const updateMessageInDatabase = async (opts: EditMessageOptions, validatedResult
   }
 
   if (message.htmlEmbed) {
-    message.htmlEmbed = Buffer.from(message.htmlEmbed).toString('base64');
+    message.htmlEmbed = htmlEmbed;
   }
 
   return [message, null] as const;
