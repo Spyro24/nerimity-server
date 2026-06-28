@@ -7,6 +7,7 @@ import { prisma, publicUserExcludeFields } from '../common/database';
 import { removeDuplicates } from '../common/utils';
 import { hasBit, USER_BADGES } from '../common/Bitwise';
 import { addDeviceWithSession, DeviceTypeId } from '@src/services/User/UserManagement';
+import { dedupeActivities } from './utils/presenceUtils';
 
 export interface ActivityStatus {
   socketId: string;
@@ -176,6 +177,7 @@ export async function getUserPresences(opts: GetUserPresencesOpts): Promise<Pres
     if (hideOffline && presence.status === UserStatus.OFFLINE) continue;
     if (!includeSocketId) {
       presence.activities = presence.activities?.map((a) => ({ ...a, socketId: undefined })) as ActivityStatus[] | undefined;
+      presence.activities = dedupeActivities(presence.activities);
     }
     presence.activities = limitActivities ? presence.activities?.slice(0, 5) : presence.activities;
     presences.push(presence);
@@ -349,16 +351,16 @@ async function storeUserCache(userId: string, beforeCache?: (user: UserCache) =>
   const userCache: UserCache = {
     ...(user.account
       ? {
-          account: {
-            id: user.account!.id,
-            emailConfirmed: user.account!.emailConfirmed,
-          },
-        }
+        account: {
+          id: user.account!.id,
+          emailConfirmed: user.account!.emailConfirmed,
+        },
+      }
       : {
-          application: {
-            id: user.application!.id,
-          },
-        }),
+        application: {
+          id: user.application!.id,
+        },
+      }),
     ...(user.shadowBan ? { shadowBanned: true } : {}),
     id: user.id,
     username: user.username,
