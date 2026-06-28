@@ -1,6 +1,6 @@
 import type { ActivityStatus } from "../UserCache";
 
-// collapse duplicate extenal activities reported by mutiple
+// collapse duplicate external activities reported by multiple
 // client sockets
 export function dedupeActivities(activities?: ActivityStatus[] | null) {
   if (!activities) return activities;
