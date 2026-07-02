@@ -4,7 +4,7 @@ import { INBOX_CLOSED, INBOX_OPENED, USER_CONNECTION_ADDED, USER_CONNECTION_REMO
 import { NOTIFICATION_DISMISSED } from '../common/ClientEventNames';
 import { emitToAll, getIO } from '../socket/socket';
 import { UserStatus } from '@src/types/User';
-import { debouncedUpdateAndEmitActivity } from '@src/socket/events/onChangeActivity';
+import { debouncedChangeActivity } from '@src/socket/events/onChangeActivity';
 
 export const emitUserPresenceUpdate = (
   userId: string,
@@ -14,7 +14,7 @@ export const emitUserPresenceUpdate = (
   selfOnly = false,
 ) => {
   if (presence.status === UserStatus.OFFLINE) {
-    debouncedUpdateAndEmitActivity.cancel(userId);
+    debouncedChangeActivity.cancel(userId);
   }
 
   const acts = presence.activities === null ? null : presence.activities?.map((a) => ({ ...a, socketId: undefined }));
