@@ -223,7 +223,9 @@ export async function updateCachePresence({ userId, socketId, presence }: Update
 
   let shouldEmit = !isOffline;
 
-  if (presence.status === undefined) {
+  const didPresenceChange = presence.status && presence.status !== currentStatus[0]?.status;
+
+  if (!didPresenceChange) {
     shouldEmit = shouldEmit && !isDeepStrictEqual(currentStatus[0]?.activities || [], newPresence.activities || []);
   }
 
