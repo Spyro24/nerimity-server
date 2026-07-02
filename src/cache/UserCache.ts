@@ -8,7 +8,6 @@ import { removeDuplicates } from '../common/utils';
 import { hasBit, USER_BADGES } from '../common/Bitwise';
 import { addDeviceWithSession, DeviceTypeId } from '@src/services/User/UserManagement';
 import { dedupeActivities } from './utils/presenceUtils';
-import { isDeepStrictEqual } from 'node:util';
 
 export interface ActivityStatus {
   socketId: string;
@@ -186,7 +185,6 @@ export async function getUserPresences(opts: GetUserPresencesOpts): Promise<Pres
 
   return presences;
 }
-
 interface UpdateCachePresenceOpts {
   userId: string;
   socketId?: string;
@@ -221,13 +219,7 @@ export async function updateCachePresence({ userId, socketId, presence }: Update
 
   await redisClient.set(key, JSON.stringify(newPresence));
 
-  let shouldEmit = !isOffline;
-
-  if (presence.status === undefined) {
-    shouldEmit = shouldEmit && !isDeepStrictEqual(currentStatus[0]?.activities || [], newPresence.activities || []);
-  }
-
-  return { shouldEmit, presence: newPresence } as const;
+  return { shouldEmit: !isOffline, presence: newPresence } as const;
 }
 
 // returns true if the first user is connected.
@@ -359,16 +351,16 @@ async function storeUserCache(userId: string, beforeCache?: (user: UserCache) =>
   const userCache: UserCache = {
     ...(user.account
       ? {
-          account: {
-            id: user.account!.id,
-            emailConfirmed: user.account!.emailConfirmed,
-          },
-        }
+        account: {
+          id: user.account!.id,
+          emailConfirmed: user.account!.emailConfirmed,
+        },
+      }
       : {
-          application: {
-            id: user.application!.id,
-          },
-        }),
+        application: {
+          id: user.application!.id,
+        },
+      }),
     ...(user.shadowBan ? { shadowBanned: true } : {}),
     id: user.id,
     username: user.username,
