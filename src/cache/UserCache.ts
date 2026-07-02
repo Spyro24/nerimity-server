@@ -225,18 +225,6 @@ export async function updateCachePresence({ userId, socketId, presence }: Update
 
   const didPresenceChange = presence.status && presence.status !== currentStatus[0]?.status;
 
-  if (userId === '1779512838155579392') {
-    console.log('------------------------');
-    console.log({
-      didPresenceChange,
-      shouldEmit,
-      current: currentStatus[0]?.activities,
-      newAct: newPresence.activities,
-      isDeep: isDeepStrictEqual(currentStatus[0]?.activities || [], newPresence.activities || []),
-    });
-    console.log('------------------------');
-  }
-
   if (!didPresenceChange) {
     shouldEmit = shouldEmit && !isDeepStrictEqual(currentStatus[0]?.activities || [], newPresence.activities || []);
   }

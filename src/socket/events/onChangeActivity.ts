@@ -3,6 +3,7 @@ import { ActivityStatus, getUserIdBySocketId, getUserPresences, updateCachePrese
 import { emitUserPresenceUpdate } from '../../emits/User';
 import { type } from 'arktype';
 import { debounceByKey } from '@src/common/debounce';
+import { checkAndUpdateRateLimit } from '@src/cache/RateLimitCache';
 
 const Activity = type({
   name: 'string',
@@ -25,6 +26,14 @@ export const debouncedChangeActivity = debounceByKey(changeActivity, 1000, (user
 export async function onChangeActivity(socket: Socket, payload: Activity[] | null) {
   const userId = await getUserIdBySocketId(socket.id);
   if (!userId) return;
+
+  const ttl = await checkAndUpdateRateLimit({
+    id: 'act_up:' + userId,
+    requests: 10,
+    perMS: 5000,
+    restrictMS: 10_000,
+  });
+  if (ttl) return;
 
   debouncedChangeActivity(userId, socket, payload);
 }
