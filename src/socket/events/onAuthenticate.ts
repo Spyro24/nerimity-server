@@ -36,7 +36,7 @@ export const authQueue = createQueue({
   name: 'wsAuth',
   prefix: env.TYPE,
   redisClient,
-  minTime: 10,
+  minTime: 3,
 });
 
 export async function onAuthenticate(socket: Socket, payload: Payload) {
