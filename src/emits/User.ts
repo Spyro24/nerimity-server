@@ -3,8 +3,6 @@ import { Presence } from '../cache/UserCache';
 import { INBOX_CLOSED, INBOX_OPENED, USER_CONNECTION_ADDED, USER_CONNECTION_REMOVED, USER_PRESENCE_UPDATE, USER_NOTIFICATION_SETTINGS_UPDATE, USER_UPDATED, USER_NOTICE_CREATED, USER_UPDATED_SELF } from '../common/ClientEventNames';
 import { NOTIFICATION_DISMISSED } from '../common/ClientEventNames';
 import { emitToAll, getIO } from '../socket/socket';
-import { UserStatus } from '@src/types/User';
-import { debouncedUpdateAndEmitActivity } from '@src/socket/events/onChangeActivity';
 
 export const emitUserPresenceUpdate = (
   userId: string,
@@ -13,10 +11,6 @@ export const emitUserPresenceUpdate = (
   },
   selfOnly = false,
 ) => {
-  if (presence.status === UserStatus.OFFLINE) {
-    debouncedUpdateAndEmitActivity.cancel(userId);
-  }
-
   const acts = presence.activities === null ? null : presence.activities?.map((a) => ({ ...a, socketId: undefined }));
   if (selfOnly) {
     getIO().to(userId).emit(USER_PRESENCE_UPDATE, acts);
