@@ -1,7 +1,8 @@
 import { Socket } from 'socket.io';
-import { ActivityStatus, ActivityStatusWithoutSocketId, getUserIdBySocketId, getUserPresences, updateCachePresence } from '../../cache/UserCache';
+import { ActivityStatus, getUserIdBySocketId, getUserPresences, updateCachePresence } from '../../cache/UserCache';
 import { emitUserPresenceUpdate } from '../../emits/User';
 import { type } from 'arktype';
+import { debounceByKey } from '@src/common/debounce';
 
 const Activity = type({
   name: 'string',
@@ -19,6 +20,8 @@ const Activity = type({
 });
 type Activity = typeof Activity.infer;
 
+export const debouncedUpdateAndEmitActivity = debounceByKey(updateAndEmitActivity, 1000, (userId) => userId, 1000);
+
 export async function onChangeActivity(socket: Socket, payload: Activity[] | null) {
   const userId = await getUserIdBySocketId(socket.id);
   if (!userId) return;
@@ -27,7 +30,7 @@ export async function onChangeActivity(socket: Socket, payload: Activity[] | nul
     payload = [payload];
   }
   if (!payload) {
-    updateAndEmitActivity(userId, socket.id, null);
+    debouncedUpdateAndEmitActivity(userId, socket.id, null);
     return;
   }
   const activities: ActivityStatus[] = [];
@@ -77,7 +80,7 @@ export async function onChangeActivity(socket: Socket, payload: Activity[] | nul
     activities.push({ ...out, socketId: socket.id });
   });
 
-  updateAndEmitActivity(userId, socket.id, activities);
+  debouncedUpdateAndEmitActivity(userId, socket.id, activities);
 }
 
 async function updateAndEmitActivity(userId: string, socketId: string, activities: ActivityStatus[] | null) {
