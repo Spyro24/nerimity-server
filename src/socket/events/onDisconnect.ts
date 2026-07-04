@@ -6,17 +6,10 @@ import { UserStatus } from '../../types/User';
 import { getVoiceUserByUserId } from '../../cache/VoiceCache';
 import { leaveVoiceChannel } from '../../services/Voice';
 import { LastOnlineStatus } from '../../services/User/User';
-import { authQueue } from './onAuthenticate';
 import { clearMembersFetched } from '../socket';
 
 export async function onDisconnect(socket: Socket) {
-  const ip = (socket.handshake.headers['cf-connecting-ip'] || socket.handshake.headers['x-forwarded-for'] || socket.handshake.address)?.toString();
-  authQueue.add(
-    async () => {
-      await handleDisconnect(socket);
-    },
-    { groupName: ip },
-  );
+  await handleDisconnect(socket);
 }
 
 const handleDisconnect = async (socket: Socket) => {

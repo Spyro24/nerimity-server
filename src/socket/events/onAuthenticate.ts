@@ -16,14 +16,13 @@ import { getVoiceUsersByChannelId } from '../../cache/VoiceCache';
 import { serverMemberHasPermission } from '../../common/serverMembeHasPermission';
 import { LastOnlineStatus } from '../../services/User/User';
 import { FriendStatus } from '../../types/Friend';
-import { createQueue } from '@nerimity/mimiqueue';
-import { redisClient } from '../../common/redis';
 import { ReminderSelect, transformReminder } from '../../services/Reminder';
-import env from '../../common/env';
 import { compressObject } from '@src/common/zstd';
 import { decryptToken } from '@src/common/JWT';
 import { userAgentToDeviceType } from '@src/services/User/UserManagement';
 import { markMembersFetched } from '../socket';
+import PQueue from 'p-queue';
+import { generateId } from '@src/common/flakeId';
 
 interface Payload {
   token: string;
@@ -32,21 +31,37 @@ interface Payload {
   currentServerId?: string;
 }
 
-export const authQueue = createQueue({
-  name: 'wsAuth',
-  prefix: env.TYPE,
-  redisClient,
-  minTime: 3,
-});
+const queue = new PQueue({ concurrency: 1 });
+const waitingOrder: string[] = [];
+
+function addWithPosition(fn: any, id: string) {
+  waitingOrder.push(id);
+
+  const promise = queue.add(
+    async (...args) => {
+      const index = waitingOrder.indexOf(id);
+      if (index !== -1) waitingOrder.splice(index, 1);
+      return fn(...args);
+    },
+    { id },
+  );
+
+  return promise;
+}
+
+function getAheadCount(id: string): number | null {
+  const index = waitingOrder.indexOf(id);
+  return index === -1 ? null : index;
+}
 
 export async function onAuthenticate(socket: Socket, payload: Payload) {
-  const queueId = await authQueue.genId();
+  const queueId = generateId();
 
   let queueEmitPositionIntervalId: NodeJS.Timeout | undefined;
 
   if (socket.connected) {
     queueEmitPositionIntervalId = setInterval(async () => {
-      const pos = await authQueue.getQueuePosition(queueId);
+      const pos = getAheadCount(queueId);
       const actualPos = pos === null ? 0 : pos + 1;
       socket.emit(USER_AUTH_QUEUE_POSITION, { pos: actualPos });
       if (!actualPos) {
@@ -59,15 +74,12 @@ export async function onAuthenticate(socket: Socket, payload: Payload) {
     }, 5000);
   }
 
-  authQueue.add(
-    async () => {
-      clearInterval(queueEmitPositionIntervalId);
-      await handleAuthenticate(socket, payload).catch((err) => {
-        console.error(err);
-      });
-    },
-    { id: queueId },
-  );
+  addWithPosition(async () => {
+    clearInterval(queueEmitPositionIntervalId);
+    await handleAuthenticate(socket, payload).catch((err) => {
+      console.error(err);
+    });
+  }, queueId);
 }
 
 const handleAuthenticate = async (socket: Socket, payload: Payload) => {
