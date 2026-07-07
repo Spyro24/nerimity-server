@@ -38,8 +38,8 @@ export function channelMessageCreate(Router: Router) {
     memberHasRolePermissionMiddleware(ROLE_PERMISSIONS.SEND_MESSAGE),
     body('content').optional(true).isString().withMessage('Content must be a string!').isLength({ min: 1, max: 2000 }).withMessage('Content length must be between 1 and 2000 characters.'),
     body('socketId').optional(true).isString().withMessage('SocketId must be a string!').isLength({ min: 1, max: 255 }).withMessage('SocketId length must be between 1 and 255 characters.'),
-    body('avatarUrl').optional(true).isString().withMessage('Avatar URL must be a string!').isLength({ min: 1, max: 255 }).withMessage('Avatar URL length must be between 1 and 255 characters.'),
-    body('username').optional(true).isString().withMessage('Invalid username.').not().contains('@').withMessage('Username cannot contain the @ symbol').not().contains(':').withMessage('Username cannot contain the : symbol').isLength({ min: 3, max: 35 }).withMessage('Username must be between 3 and 35 characters long.'),
+    body('avatar_url_override').optional(true).isString().withMessage('Avatar URL must be a string!').isLength({ min: 1, max: 255 }).withMessage('Avatar URL length must be between 1 and 255 characters.'),
+    body('username_override').optional(true).isString().withMessage('Invalid username.').not().contains('@').withMessage('Username cannot contain the @ symbol').not().contains(':').withMessage('Username cannot contain the : symbol').isLength({ min: 3, max: 35 }).withMessage('Username must be between 3 and 35 characters long.'),
 
     body('replyToMessageIds')
       .optional(true)
