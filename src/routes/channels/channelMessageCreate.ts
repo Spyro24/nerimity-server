@@ -272,6 +272,9 @@ async function route(req: Request, res: Response) {
   if (!canMasquerade) {
     return res.status(403).json(generateError('You do not have permission to masquerade yourself.'));
   }
+  if (req.channelCache.type === ChannelType.DM_TEXT) {
+    return res.status(403).json(generateError('You cannot use masquerade in DM channels.'));
+  }
 }
 
   let attachment: Partial<Attachment> | undefined = undefined;
